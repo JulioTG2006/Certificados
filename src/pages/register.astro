@@ -1,155 +1,82 @@
 ---
+import AuthLayout from "../layouts/AuthLayout.astro";
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Registro</title>
+<AuthLayout title="Registro">
+  <div class="w-full max-w-md bg-white shadow-xl rounded-3xl p-10">
 
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #4facfe, #00f2fe);
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-blue-600">
+        REGISTRO
+      </h1>
 
-      .card {
-        background: white;
-        padding: 30px;
-        border-radius: 12px;
-        width: 320px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        text-align: center;
-      }
-
-      h2 {
-        margin-bottom: 20px;
-        color: #333;
-      }
-
-      input {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-      }
-
-      button {
-        width: 100%;
-        padding: 10px;
-        background: #4facfe;
-        border: none;
-        color: white;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-      }
-
-      button:hover {
-        background: #3b8ce0;
-      }
-
-      .mensaje {
-        margin-top: 10px;
-        font-size: 14px;
-      }
-
-      .error {
-        color: red;
-      }
-
-      .success {
-        color: green;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="card">
-      <h2>Registro</h2>
-
-      <form id="form">
-        <input type="email" id="email" placeholder="Correo" required />
-        <input type="password" id="password" placeholder="Contraseña" required />
-        <button type="submit">Registrarse</button>
-      </form>
-
-      <p id="mensaje" class="mensaje"></p>
+      <p class="text-gray-500 mt-2">
+        Crea una nueva cuenta
+      </p>
     </div>
 
-    <script>
-  const form = document.getElementById("form");
-  const mensaje = document.getElementById("mensaje");
+    <form id="registerForm" class="space-y-5">
+      <input
+        type="email"
+        id="email"
+        placeholder="Correo electrónico"
+        required
+        class="w-full border border-gray-300 rounded-xl px-4 py-3"
+      />
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+      <input
+        type="password"
+        id="password"
+        placeholder="Contraseña"
+        required
+        class="w-full border border-gray-300 rounded-xl px-4 py-3"
+      />
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+      <button
+        type="submit"
+        class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700"
+      >
+        Registrarse
+      </button>
+    </form>
 
-    mensaje.textContent = "";
-    mensaje.className = "mensaje";
+    <p id="message" class="text-center mt-4 text-red-500"></p>
 
-    /* 🔥 VALIDACIÓN EMAIL (PRO) */
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    <div class="text-center mt-6">
+      <a href="/login" class="text-blue-600 hover:underline">
+        Ya tengo cuenta
+      </a>
+    </div>
+  </div>
 
-    if (!emailRegex.test(email)) {
-      mensaje.textContent = "Ingrese un email válido";
-      mensaje.classList.add("error");
-      return;
-    }
+  <script>
+    const form = document.getElementById("registerForm");
+    const message = document.getElementById("message");
 
-    /* 🔥 VALIDACIÓN PASSWORD */
-    if (password.length < 6) {
-      mensaje.textContent = "La contraseña debe tener al menos 6 caracteres";
-      mensaje.classList.add("error");
-      return;
-    }
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    /* 🔥 VALIDACIÓN EXTRA (opcional, suma puntos) */
-    if (!/[A-Z]/.test(password)) {
-      mensaje.textContent = "Debe contener al menos una mayúscula";
-      mensaje.classList.add("error");
-      return;
-    }
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-    if (!/[0-9]/.test(password)) {
-      mensaje.textContent = "Debe contener al menos un número";
-      mensaje.classList.add("error");
-      return;
-    }
+      const response = await fetch(
+        "http://localhost:3000/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, password })
+        }
+      );
 
-    /* 🚀 ENVÍO AL BACKEND */
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password })
-      });
+      const data = await response.json();
 
-      const data = await res.json();
-
-      if (res.ok) {
-        mensaje.textContent = "Registro exitoso 🎉";
-        mensaje.classList.add("success");
-        form.reset();
+      if (response.ok) {
+        window.location.href = "/login";
       } else {
-        mensaje.textContent = data.error;
-        mensaje.classList.add("error");
+        message.textContent = data.error;
       }
-
-    } catch (error) {
-      mensaje.textContent = "Error de conexión con el servidor";
-      mensaje.classList.add("error");
-    }
-  });
-</script>
-  </body>
-</html>
+    });
+  </script>
+</AuthLayout>

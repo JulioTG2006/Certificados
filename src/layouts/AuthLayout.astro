@@ -1,0 +1,16 @@
+---
+import "../styles/global.css";
+const { title = "Certificados" } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+
+  <body class="bg-slate-100 min-h-screen flex items-center justify-center">
+    <slot />
+  </body>
+</html>

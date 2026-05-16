@@ -1,0 +1,55 @@
+---
+import UserLayout from "../layouts/UserLayout.astro";
+import Card from "../components/ui/Card.astro";
+---
+
+<UserLayout title="Dashboard">
+
+  <div class="mb-10">
+    <h1 class="text-4xl font-bold text-slate-800">
+      Bienvenido
+    </h1>
+
+    <p class="text-gray-500 mt-2">
+      Gestiona tus certificados y solicitudes desde aquí.
+    </p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-6 mb-10">
+    <Card title="Solicitudes Totales" value="8" />
+    <Card title="Pendientes" value="3" />
+    <Card title="Aprobadas" value="5" />
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-md p-8">
+    <h2 class="text-2xl font-bold mb-6">
+      Solicitudes recientes
+    </h2>
+
+    <div class="space-y-4">
+
+      <div class="flex justify-between items-center border-b pb-4">
+        <span>Certificado de Estudios</span>
+        <span class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-sm">
+          Pendiente
+        </span>
+      </div>
+
+      <div class="flex justify-between items-center border-b pb-4">
+        <span>Constancia de Matrícula</span>
+        <span class="bg-green-100 text-green-700 px-4 py-1 rounded-full text-sm">
+          Aprobado
+        </span>
+      </div>
+
+      <div class="flex justify-between items-center">
+        <span>Certificado de Notas</span>
+        <span class="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm">
+          En revisión
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+</UserLayout>

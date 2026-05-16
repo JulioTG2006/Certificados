@@ -1,0 +1,60 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import Card from "../../components/ui/Card.astro";
+---
+
+<AdminLayout title="Panel Administrador">
+
+  <div class="mb-10">
+    <h1 class="text-4xl font-bold text-slate-800">
+      Panel Administrativo
+    </h1>
+
+    <p class="text-gray-500 mt-2">
+      Control general del sistema.
+    </p>
+  </div>
+
+  <div class="grid md:grid-cols-4 gap-6 mb-10">
+    <Card title="Usuarios" value="240" />
+    <Card title="Solicitudes" value="128" />
+    <Card title="Certificados" value="54" />
+    <Card title="Pendientes" value="17" />
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-md p-8">
+    <h2 class="text-2xl font-bold mb-6">
+      Actividad reciente
+    </h2>
+
+    <div class="space-y-4">
+
+      <div class="border-b pb-4">
+        Nuevo usuario registrado
+      </div>
+
+      <div class="border-b pb-4">
+        Solicitud aprobada
+      </div>
+
+      <div>
+        Nuevo certificado generado
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+  const userData = localStorage.getItem("user");
+
+  if (!userData) {
+    window.location.replace("/login");
+  } else {
+    const user = JSON.parse(userData);
+
+    if (user.rol_id !== 2) {
+      window.location.replace("/dashboard");
+    }
+  }
+</script>
+</AdminLayout>

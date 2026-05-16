@@ -1,0 +1,95 @@
+---
+import AuthLayout from "../layouts/AuthLayout.astro";
+---
+
+<AuthLayout title="Iniciar sesión">
+  <div class="w-full max-w-md bg-white shadow-xl rounded-3xl p-10">
+    
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-blue-600">
+        CERTIFICADOS
+      </h1>
+
+      <p class="text-gray-500 mt-2">
+        Inicia sesión para continuar
+      </p>
+    </div>
+
+    <form id="loginForm" class="space-y-5">
+      <input
+        type="email"
+        id="email"
+        placeholder="Correo electrónico"
+        required
+        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Contraseña"
+        required
+        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+      <button
+        type="submit"
+        class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition"
+      >
+        Ingresar
+      </button>
+    </form>
+
+    <p id="message" class="text-red-500 text-center mt-4"></p>
+
+    <div class="text-center mt-6">
+      <a href="/register" class="text-blue-600 hover:underline">
+        ¿No tienes cuenta? Regístrate
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/auth/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          message.textContent = data.error;
+          return;
+        }
+
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        if (data.user.rol_id === 1) {
+          window.location.href = "/dashboard";
+        } else if (data.user.rol_id === 2) {
+          window.location.href = "/admin";
+        }
+
+      } catch (error) {
+        message.textContent = "Error conectando con servidor";
+      }
+    });
+  </script>
+</AuthLayout>

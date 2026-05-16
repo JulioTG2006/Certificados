@@ -1,0 +1,41 @@
+<nav class="bg-white shadow-md">
+  <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
+
+    <div class="text-2xl font-bold text-blue-600">
+      CERTIFICADOS
+    </div>
+
+    <div class="flex gap-6 items-center">
+      <a href="/dashboard" class="text-gray-700 hover:text-blue-600 font-medium">
+        Dashboard
+      </a>
+
+      <a href="/certificados" class="text-gray-700 hover:text-blue-600 font-medium">
+        Certificados
+      </a>
+
+      <a href="/solicitudes" class="text-gray-700 hover:text-blue-600 font-medium">
+        Solicitudes
+      </a>
+
+      <a href="/perfil" class="text-gray-700 hover:text-blue-600 font-medium">
+        Perfil
+      </a>
+
+      <button
+        id="logoutBtn"
+        class="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600"
+      >
+        Salir
+      </button>
+    </div>
+  </div>
+</nav>
+
+<script>
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  });
+</script>
