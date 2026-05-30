@@ -2,14 +2,130 @@
 import UserLayout from "../layouts/UserLayout.astro";
 ---
 
-<UserLayout title="Solicitudes">
-  <div class="bg-white rounded-3xl shadow-md p-8">
-    <h1 class="text-3xl font-bold mb-4">
+<UserLayout title="Mis Solicitudes">
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-slate-800">
       Mis Solicitudes
     </h1>
 
-    <p class="text-gray-500">
-      Aquí podrás consultar tus solicitudes.
+    <p class="text-gray-500 mt-2">
+      Historial de solicitudes realizadas.
     </p>
   </div>
+
+  <div
+    id="solicitudesContainer"
+    class="grid gap-6"
+  >
+
+    <div class="bg-white rounded-3xl shadow-md p-6">
+      Cargando solicitudes...
+    </div>
+
+  </div>
+
+  <script>
+
+    const token =
+      localStorage.getItem("token");
+
+    async function cargarSolicitudes() {
+
+      try {
+
+        const response =
+          await fetch(
+            "http://localhost:3000/api/solicitudes/mis-solicitudes",
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`
+              }
+            }
+          );
+
+        const solicitudes =
+          await response.json();
+
+        const container =
+          document.getElementById(
+            "solicitudesContainer"
+          );
+
+        container.innerHTML = "";
+
+        if (
+          solicitudes.length === 0
+        ) {
+
+          container.innerHTML = `
+            <div class="bg-white rounded-3xl shadow-md p-6">
+              No tienes solicitudes registradas.
+            </div>
+          `;
+
+          return;
+
+        }
+
+        solicitudes.forEach(
+          solicitud => {
+
+            container.innerHTML += `
+              <div class="bg-white rounded-3xl shadow-md p-6">
+
+                <h2 class="text-2xl font-bold mb-3">
+                  ${solicitud.modelo}
+                </h2>
+
+                <p class="text-gray-600 mb-3">
+                  ${solicitud.motivo}
+                </p>
+
+                <span
+                  class="
+                    inline-block
+                    px-3 py-1 rounded-full text-sm
+                    ${
+                      solicitud.estado === "pendiente"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : solicitud.estado === "aprobada"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }
+                  "
+                >
+                  ${solicitud.estado}
+                </span>
+
+                <div class="mt-4">
+
+                  <a
+                    href="/solicitudes/${solicitud.id}"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
+                  >
+                    Ver detalle
+                  </a>
+
+                </div>
+
+              </div>
+            `;
+
+          }
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    }
+
+    cargarSolicitudes();
+
+  </script>
+
 </UserLayout>

@@ -9,7 +9,7 @@ import modelosRoutes from "./routes/modelos.routes.js";
 import solicitudesRoutes from "./routes/solicitudes.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
-
+import certificadosRoutes from "./routes/certificados.routes.js";
 
 dotenv.config();
 
@@ -24,6 +24,10 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/modelos", modelosRoutes);
 app.use("/api/solicitudes", solicitudesRoutes);
+app.use(
+  "/api/certificados",
+  certificadosRoutes
+);
 
 /* 🔥 TEST DB */
 const testDB = async () => {

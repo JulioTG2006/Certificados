@@ -1,0 +1,134 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Nuevo Modelo">
+
+  <div class="bg-white rounded-3xl shadow-md p-8">
+
+    <h1 class="text-3xl font-bold text-slate-800 mb-2">
+      Crear Modelo de Certificado
+    </h1>
+
+    <p class="text-gray-500 mb-8">
+      Registra un nuevo modelo de certificado.
+    </p>
+
+    <div class="space-y-6">
+
+      <div>
+        <label class="block mb-2 font-semibold">
+          Nombre
+        </label>
+
+        <input
+          id="nombre"
+          type="text"
+          class="w-full border rounded-xl px-4 py-3"
+          placeholder="Nombre del certificado"
+        />
+      </div>
+
+      <div>
+        <label class="block mb-2 font-semibold">
+          Descripción
+        </label>
+
+        <textarea
+          id="descripcion"
+          rows="5"
+          class="w-full border rounded-xl px-4 py-3"
+          placeholder="Descripción del certificado"
+        ></textarea>
+      </div>
+
+      <button
+        id="crearBtn"
+        class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
+      >
+        Crear modelo
+      </button>
+
+      <p
+        id="mensaje"
+        class="font-semibold"
+      ></p>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    const token =
+      localStorage.getItem("token");
+
+    async function crearModelo() {
+
+      const nombre =
+        document.getElementById("nombre").value;
+
+      const descripcion =
+        document.getElementById("descripcion").value;
+
+      try {
+
+        const response = await fetch(
+          "http://localhost:3000/api/certificados/modelos",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              nombre,
+              descripcion
+            })
+          }
+        );
+
+        const data =
+          await response.json();
+
+        const mensaje =
+          document.getElementById("mensaje");
+
+        if (!response.ok) {
+
+          mensaje.className =
+            "text-red-600 font-semibold";
+
+          mensaje.textContent =
+            data.error;
+
+          return;
+        }
+
+        mensaje.className =
+          "text-green-600 font-semibold";
+
+        mensaje.textContent =
+          data.message;
+
+        document.getElementById("nombre").value = "";
+        document.getElementById("descripcion").value = "";
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    }
+
+    document
+      .getElementById("crearBtn")
+      .addEventListener(
+        "click",
+        crearModelo
+      );
+
+  </script>
+
+</AdminLayout>

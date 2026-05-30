@@ -1,0 +1,178 @@
+---
+import UserLayout from "../../../layouts/UserLayout.astro";
+
+export const prerender = false;
+---
+
+<UserLayout title="Nueva Solicitud">
+
+  <div class="bg-white rounded-3xl shadow-md p-8 max-w-3xl">
+
+    <h1 class="text-3xl font-bold text-slate-800 mb-2">
+      Solicitar Certificado
+    </h1>
+
+    <p class="text-gray-500 mb-8">
+      Completa el motivo de tu solicitud.
+    </p>
+
+    <div class="space-y-6">
+
+      <div>
+        <label class="block font-semibold mb-2">
+          Certificado
+        </label>
+
+        <input
+          id="modelo"
+          disabled
+          class="w-full border rounded-xl px-4 py-3 bg-gray-100"
+        />
+      </div>
+
+      <div>
+        <label class="block font-semibold mb-2">
+          Motivo
+        </label>
+
+        <textarea
+          id="motivo"
+          rows="5"
+          class="w-full border rounded-xl px-4 py-3"
+          placeholder="Escribe el motivo de tu solicitud..."
+        ></textarea>
+      </div>
+
+      <button
+        id="enviarBtn"
+        class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
+      >
+        Enviar Solicitud
+      </button>
+
+      <p
+        id="mensaje"
+        class="font-semibold"
+      ></p>
+
+    </div>
+
+  </div>
+
+<script>
+
+  const token =
+    localStorage.getItem("token");
+
+  const id =
+    window.location.pathname
+      .split("/")
+      .pop();
+
+  async function cargarModelo() {
+
+    try {
+
+      const response =
+        await fetch(
+          `http://localhost:3000/api/certificados/modelos/${id}`
+        );
+
+      const modelo =
+        await response.json();
+
+      document.getElementById("modelo").value =
+        modelo.nombre;
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  async function enviarSolicitud() {
+
+    const motivo =
+      document.getElementById("motivo").value;
+
+    const mensaje =
+      document.getElementById("mensaje");
+
+    if (!motivo.trim()) {
+
+      mensaje.className =
+        "text-red-600 font-semibold";
+
+      mensaje.textContent =
+        "Debes ingresar un motivo";
+
+      return;
+
+    }
+
+    try {
+
+      const response =
+        await fetch(
+          "http://localhost:3000/api/solicitudes",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Authorization:
+                `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              modelo_certificado_id: id,
+              motivo
+            })
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+
+        mensaje.className =
+          "text-red-600 font-semibold";
+
+        mensaje.textContent =
+          data.error;
+
+        return;
+
+      }
+
+      mensaje.className =
+        "text-green-600 font-semibold";
+
+      mensaje.textContent =
+        data.message;
+
+      document.getElementById("motivo").value =
+        "";
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  document
+    .getElementById("enviarBtn")
+    .addEventListener(
+      "click",
+      enviarSolicitud
+    );
+
+  cargarModelo();
+
+</script>
+
+</UserLayout>

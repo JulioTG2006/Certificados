@@ -2,10 +2,180 @@
 import AdminLayout from "../../layouts/AdminLayout.astro";
 ---
 
-<AdminLayout title="Admin">
-  <div class="bg-white rounded-3xl shadow-md p-8">
-    <h1 class="text-3xl font-bold">
-      Página administrativa
-    </h1>
+<AdminLayout title="Gestión de Certificados">
+
+  <div class="flex justify-between items-center mb-8">
+
+    <div>
+      <h1 class="text-3xl font-bold text-slate-800">
+        Gestión de Certificados
+      </h1>
+
+      <p class="text-gray-500 mt-2">
+        Administra los modelos de certificados disponibles.
+      </p>
+    </div>
+
+    <a
+      href="/admin/certificados/nuevo"
+      class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
+    >
+      + Nuevo Modelo
+    </a>
+
   </div>
+
+  <div
+    id="certificadosContainer"
+    class="grid md:grid-cols-2 gap-6"
+  >
+
+    <div class="text-gray-500">
+      Cargando modelos...
+    </div>
+
+  </div>
+
+<script>
+
+  async function cambiarEstado(
+    id,
+    accion
+  ) {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:3000/api/certificados/modelos/${id}/${accion}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      );
+
+      const data =
+        await response.json();
+
+      alert(data.message);
+
+      cargarModelos();
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  async function cargarModelos() {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const response = await fetch(
+        "http://localhost:3000/api/certificados/modelos/admin",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          }
+        }
+      );
+
+      const modelos =
+        await response.json();
+
+      const container =
+        document.getElementById(
+          "certificadosContainer"
+        );
+
+      container.innerHTML = "";
+
+      modelos.forEach(modelo => {
+
+        container.innerHTML += `
+          <div class="bg-white rounded-3xl shadow-md p-6 border">
+
+            <h2 class="text-2xl font-bold mb-3">
+              ${modelo.nombre}
+            </h2>
+
+            <p class="text-gray-600 mb-4">
+              ${modelo.descripcion}
+            </p>
+
+            <span
+              class="
+              inline-block
+              px-3 py-1 rounded-full text-sm
+              ${
+                modelo.estado === "activo"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }
+              "
+            >
+              ${modelo.estado}
+            </span>
+
+            <div class="mt-4 flex gap-3">
+
+              <a
+                href="/admin/certificados/${modelo.id}"
+                class="bg-yellow-500 text-white px-4 py-2 rounded-xl hover:bg-yellow-600 transition"
+              >
+                Editar
+              </a>
+
+              ${
+                modelo.estado === "activo"
+                ? `
+                  <button
+                    onclick="cambiarEstado(${modelo.id}, 'desactivar')"
+                    class="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition"
+                  >
+                    Desactivar
+                  </button>
+                `
+                : `
+                  <button
+                    onclick="cambiarEstado(${modelo.id}, 'activar')"
+                    class="bg-green-500 text-white px-4 py-2 rounded-xl hover:bg-green-600 transition"
+                  >
+                    Activar
+                  </button>
+                `
+              }
+
+            </div>
+
+          </div>
+        `;
+
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  window.cambiarEstado = cambiarEstado;
+
+  cargarModelos();
+
+</script>
+
 </AdminLayout>

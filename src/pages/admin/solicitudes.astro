@@ -1,11 +1,288 @@
----
-import AdminLayout from "../../layouts/AdminLayout.astro";
----
+  ---
+  import AdminLayout from "../../layouts/AdminLayout.astro";
+  ---
 
-<AdminLayout title="Admin">
-  <div class="bg-white rounded-3xl shadow-md p-8">
-    <h1 class="text-3xl font-bold">
-      Página administrativa
-    </h1>
+  <AdminLayout title="Solicitudes Pendientes">
+
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-slate-800">
+        Solicitudes Pendientes
+      </h1>
+
+      <p class="text-gray-500 mt-2">
+        Gestiona las solicitudes de certificados.
+      </p>
+    </div>
+
+      <div class="mt-6">
+
+    <select
+      id="estadoFiltro"
+      class="border px-4 py-2 rounded-xl"
+    >
+      <option value="todos">
+        Todas
+      </option>
+
+      <option value="pendiente">
+        Pendientes
+      </option>
+
+      <option value="aprobada">
+        Aprobadas
+      </option>
+
+      <option value="rechazada">
+        Rechazadas
+      </option>
+
+    </select>
+
   </div>
-</AdminLayout>
+
+          <div
+        id="solicitudesContainer"
+        class="grid gap-6 max-h-[650px] overflow-y-auto pr-2"
+      >
+
+      <div class="bg-white rounded-3xl shadow-md p-6">
+        Cargando solicitudes...
+      </div>
+
+    </div>
+
+  <script>
+
+    const token =
+      localStorage.getItem("token");
+
+    async function aprobarSolicitud(id) {
+
+      try {
+
+        const response =
+          await fetch(
+            `http://localhost:3000/api/solicitudes/${id}/aprobar`,
+            {
+              method: "PUT",
+              headers: {
+                Authorization:
+                  `Bearer ${token}`
+              }
+            }
+          );
+
+        const data =
+          await response.json();
+
+        alert(data.message);
+
+        cargarSolicitudes();
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    }
+
+      async function rechazarSolicitud(id) {
+
+      const observacion =
+        prompt(
+          "Ingrese el motivo del rechazo:"
+        );
+
+      if (
+        !observacion
+      ) return;
+
+      try {
+
+        const response =
+          await fetch(
+            `http://localhost:3000/api/solicitudes/${id}/rechazar`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type":
+                  "application/json",
+                Authorization:
+                  `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                observacion
+              })
+            }
+          );
+
+        const data =
+          await response.json();
+
+        alert(
+          data.message
+        );
+
+        cargarSolicitudes();
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    }
+
+    async function cargarSolicitudes() {
+
+      try {
+
+        const response =
+          await fetch(
+            "http://localhost:3000/api/solicitudes",
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`
+              }
+            }
+          );
+
+        const solicitudes =
+          await response.json();
+
+          const estadoSeleccionado =
+            document.getElementById(
+              "estadoFiltro"
+            ).value;
+
+          const solicitudesFiltradas =
+            estadoSeleccionado === "todos"
+              ? solicitudes
+              : solicitudes.filter(
+                  solicitud =>
+            solicitud.estado ===
+            estadoSeleccionado
+        );
+
+        const container =
+          document.getElementById(
+            "solicitudesContainer"
+          );
+
+        container.innerHTML = "";
+
+        if (
+            solicitudesFiltradas.length === 0
+          )  {
+
+          container.innerHTML = `
+            <div class="bg-white rounded-3xl shadow-md p-6">
+              No hay solicitudes pendientes.
+            </div>
+          `;
+
+          return;
+
+        }
+
+        solicitudesFiltradas.forEach(
+          solicitud => {
+
+            container.innerHTML += `
+              <div class="bg-white rounded-3xl shadow-md p-6 border">
+
+                <h2 class="text-2xl font-bold mb-3">
+                  ${solicitud.modelo}
+                </h2>
+
+                <p class="mb-2">
+                  <strong>Usuario:</strong>
+                  ${solicitud.usuario}
+                </p>
+
+                <p class="mb-4">
+                  <strong>Motivo:</strong>
+                  ${solicitud.motivo}
+                </p>
+
+                ${
+                    solicitud.estado === "pendiente"
+                    ? `
+                      <div class="flex gap-3">
+
+                        <button
+                          onclick="aprobarSolicitud(${solicitud.id})"
+                          class="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition"
+                        >
+                          Aprobar
+                        </button>
+
+                        <button
+                          onclick="rechazarSolicitud(${solicitud.id})"
+                          class="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition"
+                        >
+                          Rechazar
+                        </button>
+
+                      </div>
+                    `
+                    : `
+                      <div class="mt-2">
+
+                        <span
+                          class="
+                            px-3 py-1 rounded-full text-sm
+                            ${
+                              solicitud.estado === "aprobada"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                            }
+                          "
+                        >
+                          ${
+                            solicitud.estado === "aprobada"
+                            ? "Solicitud aprobada"
+                            : "Solicitud rechazada"
+                          }
+                        </span>
+
+                      </div>
+                    `
+                  }
+
+              </div>
+            `;
+
+          }
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    }
+
+    window.aprobarSolicitud =
+      aprobarSolicitud;
+
+    window.rechazarSolicitud =
+      rechazarSolicitud;
+
+    document
+    .getElementById(
+      "estadoFiltro"
+    )
+    .addEventListener(
+      "change",
+      cargarSolicitudes
+    );
+
+    cargarSolicitudes();
+
+  </script>
+
+  </AdminLayout>

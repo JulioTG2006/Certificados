@@ -1,0 +1,90 @@
+---
+import UserLayout from "../../layouts/UserLayout.astro";
+
+export const prerender = false;
+---
+
+<UserLayout title="Detalle Certificado">
+
+  <div
+    id="detalleContainer"
+    class="bg-white rounded-3xl shadow-md p-8"
+  >
+
+    <h1 class="text-3xl font-bold">
+      Cargando...
+    </h1>
+
+  </div>
+
+  <script>
+
+    async function cargarDetalle() {
+
+      try {
+
+        const id =
+          window.location.pathname
+            .split("/")
+            .pop();
+
+        const response = await fetch(
+          `http://localhost:3000/api/certificados/modelos/${id}`
+        );
+
+        const certificado =
+          await response.json();
+
+        const container =
+          document.getElementById(
+            "detalleContainer"
+          );
+
+        container.innerHTML = `
+          <h1 class="text-4xl font-bold text-slate-800 mb-6">
+            ${certificado.nombre}
+          </h1>
+
+          <p class="text-gray-600 text-lg mb-8">
+            ${certificado.descripcion}
+          </p>
+
+          <div class="flex gap-4 flex-wrap">
+
+            <a
+              href="/solicitudes/nueva/${certificado.id}"
+              class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition"
+            >
+              Solicitar Certificado
+            </a>
+
+            <a
+              href="/certificados"
+              class="bg-slate-600 text-white px-6 py-3 rounded-xl hover:bg-slate-700 transition"
+            >
+              Volver al catálogo
+            </a>
+
+            <a
+              href="/certificados/preview/${certificado.id}"
+              class="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition"
+            >
+              Vista previa
+            </a>
+
+          </div>
+        `;
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+    }
+
+    cargarDetalle();
+
+  </script>
+
+</UserLayout>

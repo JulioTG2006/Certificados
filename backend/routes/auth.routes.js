@@ -176,6 +176,108 @@ router.get(
   }
 });
 
+router.get(
+  "/profile",
+  verifyToken,
+  async (req, res) => {
+    try {
 
+      const conn = await getConnection();
+
+      const [users] = await conn.query(
+        `
+        SELECT
+          id,
+          email,
+          estado,
+          rol_id,
+          fecha_registro
+        FROM usuarios
+        WHERE id = ?
+        `,
+        [req.user.id]
+      );
+
+      if (users.length === 0) {
+        return res.status(404).json({
+          error: "Usuario no encontrado"
+        });
+      }
+
+      res.json(users[0]);
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error obteniendo perfil"
+      });
+    }
+  }
+);
+
+
+router.put(
+  "/profile",
+  verifyToken,
+  async (req, res) => {
+    try {
+
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          error: "Email obligatorio"
+        });
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          error: "Email inválido"
+        });
+      }
+
+      const conn = await getConnection();
+
+      const [exist] = await conn.query(
+        `
+        SELECT id
+        FROM usuarios
+        WHERE email = ?
+        AND id != ?
+        `,
+        [email, req.user.id]
+      );
+
+      if (exist.length > 0) {
+        return res.status(400).json({
+          error: "Email ya registrado"
+        });
+      }
+
+      await conn.query(
+        `
+        UPDATE usuarios
+        SET email = ?
+        WHERE id = ?
+        `,
+        [email, req.user.id]
+      );
+
+      res.json({
+        message: "Perfil actualizado correctamente"
+      });
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error actualizando perfil"
+      });
+    }
+  }
+);
 
 export default router;
