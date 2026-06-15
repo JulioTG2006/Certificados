@@ -295,7 +295,11 @@ router.put(
 
     try {
 
-      const { id } = req.params;
+      const { id } =
+        req.params;
+
+      const codigo =
+        `CERT-${Date.now()}`;
 
       const conn =
         await getConnection();
@@ -303,17 +307,22 @@ router.put(
       await conn.query(
         `
         UPDATE solicitudes
-          SET
+        SET
           estado='aprobada',
-          fecha_resolucion=NOW()
-      WHERE id=?
+          fecha_resolucion=NOW(),
+          codigo_verificacion=?
+        WHERE id=?
         `,
-        [id]
+        [
+          codigo,
+          id
+        ]
       );
 
       res.json({
         message:
-          "Solicitud aprobada correctamente"
+          "Solicitud aprobada correctamente",
+        codigo
       });
 
     } catch (error) {

@@ -99,17 +99,31 @@ import UserLayout from "../layouts/UserLayout.astro";
                   ${solicitud.estado}
                 </span>
 
-                <div class="mt-4">
+                <div class="mt-4 flex gap-3">
 
-                  <a
-                    href="/solicitudes/${solicitud.id}"
-                    class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
-                  >
-                    Ver detalle
-                  </a>
+                    <a
+                      href="/solicitudes/${solicitud.id}"
+                      class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
+                    >
+                      Ver detalle
+                    </a>
 
-                </div>
+                    ${
+                      solicitud.estado === "aprobada"
+                      ? `
+                        <a
+                          href="http://localhost:3000/api/certificados/generar/${solicitud.id}"
+                          target="_blank"
+                          class="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition"
+                        >
+                          Descargar PDF
+                        </a>
+                      `
+                      : ""
+                    }
 
+                  </div>
+          
               </div>
             `;
 

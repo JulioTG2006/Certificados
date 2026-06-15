@@ -10,6 +10,8 @@ import solicitudesRoutes from "./routes/solicitudes.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import certificadosRoutes from "./routes/certificados.routes.js";
+import soporteRoutes
+from "./routes/soporte.routes.js";
 
 dotenv.config();
 
@@ -59,6 +61,12 @@ app.get("/health", async (req, res) => {
     });
   }
 });
+
+//SOPORTE/CONTACTO
+app.use(
+  "/api/soporte",
+  soporteRoutes
+);
 
 app.use(errorHandler);
 

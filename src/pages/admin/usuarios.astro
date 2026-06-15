@@ -2,10 +2,216 @@
 import AdminLayout from "../../layouts/AdminLayout.astro";
 ---
 
-<AdminLayout title="Admin">
-  <div class="bg-white rounded-3xl shadow-md p-8">
-    <h1 class="text-3xl font-bold">
-      Página administrativa
+<AdminLayout title="Usuarios">
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-slate-800">
+      Gestión de Usuarios
     </h1>
+
+    <p class="text-gray-500 mt-2">
+      Lista de usuarios registrados.
+    </p>
   </div>
+
+  <div
+    id="usuariosContainer"
+    class="grid gap-6"
+  >
+
+    <div class="bg-white rounded-3xl shadow-md p-6">
+      Cargando usuarios...
+    </div>
+
+  </div>
+
+<script>
+
+  async function cargarUsuarios() {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const response =
+        await fetch(
+          "http://localhost:3000/api/auth/users",
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            }
+          }
+        );
+
+      const usuarios =
+        await response.json();
+
+      const container =
+        document.getElementById(
+          "usuariosContainer"
+        );
+
+      container.innerHTML = "";
+
+      if (
+        usuarios.length === 0
+      ) {
+
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl shadow-md p-6">
+            No hay usuarios registrados.
+          </div>
+        `;
+
+        return;
+
+      }
+
+      usuarios.forEach(
+        usuario => {
+
+          container.innerHTML += `
+            <div class="bg-white rounded-3xl shadow-md p-6 border">
+
+              <h2 class="text-xl font-bold mb-2">
+                ${usuario.email}
+              </h2>
+
+              <p>
+                <strong>ID:</strong>
+                ${usuario.id}
+              </p>
+
+              <p>
+                <strong>Rol:</strong>
+                ${
+                  usuario.rol_id === 2
+                  ? "Administrador"
+                  : "Usuario"
+                }
+              </p>
+
+              <p>
+                <strong>Estado:</strong>
+                ${usuario.estado}
+              </p>
+
+              <div class="mt-4 flex gap-3">
+
+                ${
+                  usuario.estado === "activo"
+                  ? `
+                    <button
+                      onclick="desactivarUsuario(${usuario.id})"
+                      class="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition"
+                    >
+                      Desactivar
+                    </button>
+                  `
+                  : `
+                    <button
+                      onclick="activarUsuario(${usuario.id})"
+                      class="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition"
+                    >
+                      Activar
+                    </button>
+                  `
+                }
+
+              </div>
+
+            </div>
+          `;
+
+        }
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  async function desactivarUsuario(id) {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const response =
+        await fetch(
+          `http://localhost:3000/api/auth/users/${id}/desactivar`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            }
+          }
+        );
+
+      const data =
+        await response.json();
+
+      alert(data.message);
+
+      cargarUsuarios();
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  async function activarUsuario(id) {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const response =
+        await fetch(
+          `http://localhost:3000/api/auth/users/${id}/activar`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            }
+          }
+        );
+
+      const data =
+        await response.json();
+
+      alert(data.message);
+
+      cargarUsuarios();
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  window.activarUsuario =
+    activarUsuario;
+
+  window.desactivarUsuario =
+    desactivarUsuario;
+
+  cargarUsuarios();
+
+</script>
+
 </AdminLayout>

@@ -280,4 +280,215 @@ router.put(
   }
 );
 
+//DESACTIVAR USUARIOS
+router.put(
+  "/users/:id/desactivar",
+  verifyToken,
+  verifyRole(2),
+  async (req, res) => {
+
+    try {
+
+      const { id } =
+        req.params;
+
+      const conn =
+        await getConnection();
+
+      await conn.query(
+        `
+        UPDATE usuarios
+        SET estado='inactivo'
+        WHERE id=?
+        `,
+        [id]
+      );
+
+      res.json({
+        message:
+          "Usuario desactivado correctamente"
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          "Error desactivando usuario"
+      });
+
+    }
+
+  }
+);
+
+//ACTIVAR USUARIOS 
+router.put(
+  "/users/:id/activar",
+  verifyToken,
+  verifyRole(2),
+  async (req, res) => {
+
+    try {
+
+      const { id } =
+        req.params;
+
+      const conn =
+        await getConnection();
+
+      await conn.query(
+        `
+        UPDATE usuarios
+        SET estado='activo'
+        WHERE id=?
+        `,
+        [id]
+      );
+
+      res.json({
+        message:
+          "Usuario activado correctamente"
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          "Error activando usuario"
+      });
+
+    }
+
+  }
+);
+
+/* Estadísticas sistema */
+
+router.get(
+  "/stats",
+  verifyToken,
+  verifyRole(2),
+  async (req, res) => {
+
+    try {
+
+      const conn =
+        await getConnection();
+
+      const [[usuarios]] =
+        await conn.query(
+          `
+          SELECT COUNT(*) total
+          FROM usuarios
+          `
+        );
+
+      const [[certificados]] =
+        await conn.query(
+          `
+          SELECT COUNT(*) total
+          FROM modelos_certificado
+          `
+        );
+
+      const [[solicitudes]] =
+        await conn.query(
+          `
+          SELECT COUNT(*) total
+          FROM solicitudes
+          `
+        );
+
+      res.json({
+        usuarios:
+          usuarios.total,
+        certificados:
+          certificados.total,
+        solicitudes:
+          solicitudes.total
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          "Error obteniendo estadísticas"
+      });
+
+    }
+
+  }
+);
+
+
+/* Estadísticas solicitudes */
+
+router.get(
+  "/stats/solicitudes",
+  verifyToken,
+  verifyRole(2),
+  async (req, res) => {
+
+    try {
+
+      const conn =
+        await getConnection();
+
+      const [[pendientes]] =
+        await conn.query(
+          `
+          SELECT COUNT(*) total
+          FROM solicitudes
+          WHERE estado='pendiente'
+          `
+        );
+
+      const [[aprobadas]] =
+        await conn.query(
+          `
+          SELECT COUNT(*) total
+          FROM solicitudes
+          WHERE estado='aprobada'
+          `
+        );
+
+      const [[rechazadas]] =
+        await conn.query(
+          `
+          SELECT COUNT(*) total
+          FROM solicitudes
+          WHERE estado='rechazada'
+          `
+        );
+
+      res.json({
+        pendientes:
+          pendientes.total,
+        aprobadas:
+          aprobadas.total,
+        rechazadas:
+          rechazadas.total
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error:
+          "Error obteniendo métricas"
+      });
+
+    }
+
+  }
+);
+
+
 export default router;

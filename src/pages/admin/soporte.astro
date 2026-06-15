@@ -1,0 +1,186 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Soporte">
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-slate-800">
+      Mensajes de Soporte
+    </h1>
+
+    <p class="text-gray-500 mt-2">
+      Gestiona las consultas enviadas por los usuarios.
+    </p>
+  </div>
+
+  <div
+    id="mensajesContainer"
+    class="grid gap-6"
+  >
+
+    <div class="bg-white rounded-3xl shadow-md p-6">
+      Cargando mensajes...
+    </div>
+
+  </div>
+
+<script>
+
+  const token =
+    localStorage.getItem("token");
+
+  async function responderMensaje(id) {
+
+    const respuesta =
+      prompt(
+        "Ingrese la respuesta:"
+      );
+
+    if (!respuesta)
+      return;
+
+    try {
+
+      const response =
+        await fetch(
+          `http://localhost:3000/api/soporte/${id}/responder`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type":
+                "application/json",
+              Authorization:
+                `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              respuesta
+            })
+          }
+        );
+
+      const data =
+        await response.json();
+
+      alert(data.message);
+
+      cargarMensajes();
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  async function cargarMensajes() {
+
+    try {
+
+      const response =
+        await fetch(
+          "http://localhost:3000/api/soporte",
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            }
+          }
+        );
+
+      const mensajes =
+        await response.json();
+
+      const container =
+        document.getElementById(
+          "mensajesContainer"
+        );
+
+      container.innerHTML = "";
+
+      if (
+        mensajes.length === 0
+      ) {
+
+        container.innerHTML = `
+          <div class="bg-white rounded-3xl shadow-md p-6">
+            No existen mensajes.
+          </div>
+        `;
+
+        return;
+
+      }
+
+      mensajes.forEach(
+        mensaje => {
+
+          container.innerHTML += `
+            <div class="bg-white rounded-3xl shadow-md p-6 border">
+
+              <h2 class="text-xl font-bold mb-3">
+                ${mensaje.asunto}
+              </h2>
+
+              <p class="mb-2">
+                <strong>Usuario:</strong>
+                ${mensaje.email}
+              </p>
+
+              <p class="mb-4">
+                ${mensaje.mensaje}
+              </p>
+
+              <p class="mb-4">
+                <strong>Estado:</strong>
+                ${mensaje.estado}
+              </p>
+
+              ${
+                mensaje.estado === "pendiente"
+                ? `
+                  <button
+                    onclick="responderMensaje(${mensaje.id})"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
+                  >
+                    Responder
+                  </button>
+                `
+                : `
+                  <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+
+                    <strong>
+                      Respuesta:
+                    </strong>
+
+                    <p class="mt-2">
+                      ${mensaje.respuesta}
+                    </p>
+
+                  </div>
+                `
+              }
+
+            </div>
+          `;
+
+        }
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+  window.responderMensaje =
+    responderMensaje;
+
+  cargarMensajes();
+
+</script>
+
+</AdminLayout>
