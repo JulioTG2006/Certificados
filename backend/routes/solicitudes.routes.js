@@ -75,6 +75,39 @@ router.post(
   }
 );
 
+// Solicitudes recientes para vista del administrador
+
+router.get(
+  "/actividad-reciente",
+  verifyToken,
+  verifyRole(2),
+  async (req, res) => {
+    try {
+      const conn = await getConnection();
+
+      const [rows] = await conn.query(`
+        SELECT 
+          CONCAT('Nueva solicitud registrada por ', u.email) AS descripcion,
+          s.fecha_solicitud AS fecha
+        FROM solicitudes s
+        JOIN usuarios u
+          ON s.usuario_id = u.id
+        ORDER BY s.fecha_solicitud DESC
+        LIMIT 4 
+      `);
+
+      res.json(rows);
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error al obtener actividad reciente"
+      });
+    }
+  }
+);
+
 /* Listar solicitudes */
 router.get(
   "/",

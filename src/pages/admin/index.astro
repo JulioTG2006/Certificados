@@ -18,11 +18,9 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
     id="statsContainer"
     class="grid md:grid-cols-3 gap-6 mb-10"
   >
-
     <div class="bg-white rounded-3xl shadow-md p-6">
       Cargando estadísticas...
     </div>
-
   </div>
 
   <div class="bg-white rounded-3xl shadow-md p-8">
@@ -30,167 +28,168 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
       Actividad reciente
     </h2>
 
-    <div class="space-y-4">
-
-      <div class="border-b pb-4">
-        Nuevo usuario registrado
-      </div>
-
-      <div class="border-b pb-4">
-        Solicitud aprobada
-      </div>
-
-      <div>
-        Nuevo certificado generado
-      </div>
-
+    <div
+      id="actividadContainer"
+      class="space-y-4"
+    >
+      <p class="text-gray-500">
+        Cargando actividad reciente...
+      </p>
     </div>
   </div>
 
   <script>
-
-    const userData =
-      localStorage.getItem("user");
+    const userData = localStorage.getItem("user");
 
     if (!userData) {
-
-      window.location.replace(
-        "/login"
-      );
-
+      window.location.replace("/login");
     } else {
+      const user = JSON.parse(userData);
 
-      const user =
-        JSON.parse(userData);
-
-      if (
-        user.rol_id !== 2
-      ) {
-
-        window.location.replace(
-          "/dashboard"
-        );
-
+      if (user.rol_id !== 2) {
+        window.location.replace("/dashboard");
       }
-
     }
 
     async function cargarStats() {
-
       try {
+        const token = localStorage.getItem("token");
 
-        const token =
-          localStorage.getItem(
-            "token"
-          );
-
-        const response =
-          await fetch(
-            "http://localhost:3000/api/auth/stats",
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${token}`
-              }
+        const response = await fetch(
+          "http://localhost:3000/api/auth/stats",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
             }
-          );
+          }
+        );
 
-        const stats =
-          await response.json();
+        const stats = await response.json();
 
-        const responseEstados =
-          await fetch(
-            "http://localhost:3000/api/auth/stats/solicitudes",
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${token}`
-              }
+        const responseEstados = await fetch(
+          "http://localhost:3000/api/auth/stats/solicitudes",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
             }
-          );
+          }
+        );
 
-        const estados =
-          await responseEstados.json();
+        const estados = await responseEstados.json();
 
-        const container =
-          document.getElementById(
-            "statsContainer"
-          );
+        const container = document.getElementById("statsContainer");
 
         container.innerHTML = `
-
           <div class="bg-white rounded-3xl shadow-md p-6 text-center">
-            <h3 class="text-lg font-semibold">
-              Usuarios
-            </h3>
-
-            <p class="text-4xl font-bold mt-3">
-              ${stats.usuarios}
-            </p>
+            <h3 class="text-lg font-semibold">Usuarios</h3>
+            <p class="text-4xl font-bold mt-3">${stats.usuarios}</p>
           </div>
 
           <div class="bg-white rounded-3xl shadow-md p-6 text-center">
-            <h3 class="text-lg font-semibold">
-              Solicitudes
-            </h3>
-
-            <p class="text-4xl font-bold mt-3">
-              ${stats.solicitudes}
-            </p>
+            <h3 class="text-lg font-semibold">Solicitudes</h3>
+            <p class="text-4xl font-bold mt-3">${stats.solicitudes}</p>
           </div>
 
           <div class="bg-white rounded-3xl shadow-md p-6 text-center">
-            <h3 class="text-lg font-semibold">
-              Certificados
-            </h3>
-
-            <p class="text-4xl font-bold mt-3">
-              ${stats.certificados}
-            </p>
+            <h3 class="text-lg font-semibold">Certificados</h3>
+            <p class="text-4xl font-bold mt-3">${stats.certificados}</p>
           </div>
 
           <div class="bg-white rounded-3xl shadow-md p-6 text-center">
-            <h3 class="text-lg font-semibold">
-              Pendientes
-            </h3>
-
-            <p class="text-4xl font-bold mt-3 text-yellow-600">
-              ${estados.pendientes}
-            </p>
+            <h3 class="text-lg font-semibold">Pendientes</h3>
+            <p class="text-4xl font-bold mt-3 text-yellow-600">${estados.pendientes}</p>
           </div>
 
           <div class="bg-white rounded-3xl shadow-md p-6 text-center">
-            <h3 class="text-lg font-semibold">
-              Aprobadas
-            </h3>
-
-            <p class="text-4xl font-bold mt-3 text-green-600">
-              ${estados.aprobadas}
-            </p>
+            <h3 class="text-lg font-semibold">Aprobadas</h3>
+            <p class="text-4xl font-bold mt-3 text-green-600">${estados.aprobadas}</p>
           </div>
 
           <div class="bg-white rounded-3xl shadow-md p-6 text-center">
-            <h3 class="text-lg font-semibold">
-              Rechazadas
-            </h3>
-
-            <p class="text-4xl font-bold mt-3 text-red-600">
-              ${estados.rechazadas}
-            </p>
+            <h3 class="text-lg font-semibold">Rechazadas</h3>
+            <p class="text-4xl font-bold mt-3 text-red-600">${estados.rechazadas}</p>
           </div>
-
         `;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    async function cargarActividadReciente() {
+      const actividadContainer =
+        document.getElementById("actividadContainer");
+
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+          "http://localhost:3000/api/solicitudes/actividad-reciente",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        const actividades = await response.json();
+
+        if (!response.ok) {
+          actividadContainer.innerHTML = `
+            <p class="text-red-500">
+              No se pudo cargar la actividad reciente.
+            </p>
+          `;
+          return;
+        }
+
+        if (actividades.length === 0) {
+          actividadContainer.innerHTML = `
+            <p class="text-gray-500">
+              No hay actividad reciente registrada.
+            </p>
+          `;
+          return;
+        }
+
+        actividadContainer.innerHTML = actividades
+          .map((actividad, index) => {
+            const borde =
+              index !== actividades.length - 1
+                ? "border-b pb-4"
+                : "";
+
+            return `
+              <div class="${borde}">
+                <p class="font-medium text-slate-700">
+                  ${actividad.descripcion}
+                </p>
+
+                <p class="text-sm text-gray-400 mt-1">
+                  ${new Date(actividad.fecha).toLocaleString()}
+                </p>
+              </div>
+            `;
+          })
+          .join("");
 
       } catch (error) {
-
         console.error(error);
 
+        actividadContainer.innerHTML = `
+          <p class="text-red-500">
+            Error de conexión con el servidor.
+          </p>
+        `;
       }
-
     }
 
     cargarStats();
+    cargarActividadReciente();
 
+    setInterval(() => {
+      cargarStats();
+      cargarActividadReciente();
+    }, 5000);
   </script>
 
 </AdminLayout>
