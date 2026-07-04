@@ -6,25 +6,52 @@ const router = express.Router();
 /* 🔥 Crear modelo */
 router.post("/", async (req, res) => {
   try {
-    const { titulo, descripcion, archivo_template, estado } = req.body;
+
+    const {
+      nombre,
+      descripcion,
+      plantilla_html,
+      estado
+    } = req.body;
 
     const conn = await getConnection();
 
     const [result] = await conn.query(
-      `INSERT INTO modelos_certificados 
-       (titulo, descripcion, archivo_template, estado)
-       VALUES (?, ?, ?, ?)`,
-      [titulo, descripcion, archivo_template, estado]
+      `INSERT INTO modelos_certificado
+      (
+        nombre,
+        descripcion,
+        plantilla_html,
+        estado
+      )
+      VALUES
+      (
+        ?,
+        ?,
+        ?,
+        ?
+      )`,
+      [
+        nombre,
+        descripcion,
+        plantilla_html,
+        estado
+      ]
     );
 
     res.json({
-      message: "Modelo creado",
-      id: result.insertId,
+      message: "Modelo creado correctamente",
+      id: result.insertId
     });
 
   } catch (error) {
+
     console.error(error);
-    res.status(500).json({ error: "Error al crear modelo" });
+
+    res.status(500).json({
+      error: "Error al crear modelo"
+    });
+
   }
 });
 
